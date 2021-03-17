@@ -223,6 +223,57 @@ interface IERC721 is IERC165 {
     function safeTransferFrom(address from, address to, uint256 tokenId, bytes calldata data) external;
 }
 
+pragma solidity ^0.6.2;
+
+
+/**
+ * @title ERC-721 Non-Fungible Token Standard, optional metadata extension
+ * @dev See https://eips.ethereum.org/EIPS/eip-721
+ */
+interface IERC721Metadata is IERC721 {
+
+    /**
+     * @dev Returns the token collection name.
+     */
+    function name() external view returns (string memory);
+
+    /**
+     * @dev Returns the token collection symbol.
+     */
+    function symbol() external view returns (string memory);
+
+    /**
+     * @dev Returns the Uniform Resource Identifier (URI) for `tokenId` token.
+     */
+    function tokenURI(uint256 tokenId) external view returns (string memory);
+}
+
+pragma solidity ^0.6.2;
+
+/**
+ * @title ERC-721 Non-Fungible Token Standard, optional enumeration extension
+ * @dev See https://eips.ethereum.org/EIPS/eip-721
+ */
+interface IERC721Enumerable is IERC721 {
+
+    /**
+     * @dev Returns the total amount of tokens stored by the contract.
+     */
+    function totalSupply() external view returns (uint256);
+
+    /**
+     * @dev Returns a token ID owned by `owner` at a given `index` of its token list.
+     * Use along with {balanceOf} to enumerate all of ``owner``'s tokens.
+     */
+    function tokenOfOwnerByIndex(address owner, uint256 index) external view returns (uint256 tokenId);
+
+    /**
+     * @dev Returns a token ID at a given `index` of all the tokens stored by the contract.
+     * Use along with {totalSupply} to enumerate all tokens.
+     */
+    function tokenByIndex(uint256 index) external view returns (uint256);
+}
+
 pragma solidity ^0.6.0;
 
 /**
@@ -661,220 +712,116 @@ library EnumerableSet {
 pragma solidity ^0.6.0;
 
 /**
- * @dev Wrappers over Solidity's arithmetic operations with added overflow
- * checks.
- *
- * Arithmetic operations in Solidity wrap on overflow. This can easily result
- * in bugs, because programmers usually assume that an overflow raises an
- * error, which is the standard behavior in high level programming languages.
- * `SafeMath` restores this intuition by reverting the transaction when an
- * operation overflows.
- *
- * Using this library instead of the unchecked operations eliminates an entire
- * class of bugs, so it's recommended to use it always.
+ * @dev Interface of the ERC20 standard as defined in the EIP.
  */
-library SafeMath {
+interface IERC20 {
     /**
-     * @dev Returns the addition of two unsigned integers, reverting on
-     * overflow.
-     *
-     * Counterpart to Solidity's `+` operator.
-     *
-     * Requirements:
-     *
-     * - Addition cannot overflow.
+     * @dev Returns the amount of tokens in existence.
      */
-    function add(uint256 a, uint256 b) internal pure returns (uint256) {
-        uint256 c = a + b;
-        require(c >= a, "SafeMath: addition overflow");
-
-        return c;
-    }
+    function totalSupply() external view returns (uint256);
 
     /**
-     * @dev Returns the subtraction of two unsigned integers, reverting on
-     * overflow (when the result is negative).
-     *
-     * Counterpart to Solidity's `-` operator.
-     *
-     * Requirements:
-     *
-     * - Subtraction cannot overflow.
+     * @dev Returns the amount of tokens owned by `account`.
      */
-    function sub(uint256 a, uint256 b) internal pure returns (uint256) {
-        return sub(a, b, "SafeMath: subtraction overflow");
-    }
-
-    /**
-     * @dev Returns the subtraction of two unsigned integers, reverting with custom message on
-     * overflow (when the result is negative).
-     *
-     * Counterpart to Solidity's `-` operator.
-     *
-     * Requirements:
-     *
-     * - Subtraction cannot overflow.
-     */
-    function sub(uint256 a, uint256 b, string memory errorMessage) internal pure returns (uint256) {
-        require(b <= a, errorMessage);
-        uint256 c = a - b;
-
-        return c;
-    }
-
-    /**
-     * @dev Returns the multiplication of two unsigned integers, reverting on
-     * overflow.
-     *
-     * Counterpart to Solidity's `*` operator.
-     *
-     * Requirements:
-     *
-     * - Multiplication cannot overflow.
-     */
-    function mul(uint256 a, uint256 b) internal pure returns (uint256) {
-        // Gas optimization: this is cheaper than requiring 'a' not being zero, but the
-        // benefit is lost if 'b' is also tested.
-        // See: https://github.com/OpenZeppelin/openzeppelin-contracts/pull/522
-        if (a == 0) {
-            return 0;
-        }
-
-        uint256 c = a * b;
-        require(c / a == b, "SafeMath: multiplication overflow");
-
-        return c;
-    }
-
-    /**
-     * @dev Returns the integer division of two unsigned integers. Reverts on
-     * division by zero. The result is rounded towards zero.
-     *
-     * Counterpart to Solidity's `/` operator. Note: this function uses a
-     * `revert` opcode (which leaves remaining gas untouched) while Solidity
-     * uses an invalid opcode to revert (consuming all remaining gas).
-     *
-     * Requirements:
-     *
-     * - The divisor cannot be zero.
-     */
-    function div(uint256 a, uint256 b) internal pure returns (uint256) {
-        return div(a, b, "SafeMath: division by zero");
-    }
-
-    /**
-     * @dev Returns the integer division of two unsigned integers. Reverts with custom message on
-     * division by zero. The result is rounded towards zero.
-     *
-     * Counterpart to Solidity's `/` operator. Note: this function uses a
-     * `revert` opcode (which leaves remaining gas untouched) while Solidity
-     * uses an invalid opcode to revert (consuming all remaining gas).
-     *
-     * Requirements:
-     *
-     * - The divisor cannot be zero.
-     */
-    function div(uint256 a, uint256 b, string memory errorMessage) internal pure returns (uint256) {
-        require(b > 0, errorMessage);
-        uint256 c = a / b;
-        // assert(a == b * c + a % b); // There is no case in which this doesn't hold
-
-        return c;
-    }
-
-    /**
-     * @dev Returns the remainder of dividing two unsigned integers. (unsigned integer modulo),
-     * Reverts when dividing by zero.
-     *
-     * Counterpart to Solidity's `%` operator. This function uses a `revert`
-     * opcode (which leaves remaining gas untouched) while Solidity uses an
-     * invalid opcode to revert (consuming all remaining gas).
-     *
-     * Requirements:
-     *
-     * - The divisor cannot be zero.
-     */
-    function mod(uint256 a, uint256 b) internal pure returns (uint256) {
-        return mod(a, b, "SafeMath: modulo by zero");
-    }
-
-    /**
-     * @dev Returns the remainder of dividing two unsigned integers. (unsigned integer modulo),
-     * Reverts with custom message when dividing by zero.
-     *
-     * Counterpart to Solidity's `%` operator. This function uses a `revert`
-     * opcode (which leaves remaining gas untouched) while Solidity uses an
-     * invalid opcode to revert (consuming all remaining gas).
-     *
-     * Requirements:
-     *
-     * - The divisor cannot be zero.
-     */
-    function mod(uint256 a, uint256 b, string memory errorMessage) internal pure returns (uint256) {
-        require(b != 0, errorMessage);
-        return a % b;
-    }
-}
-
-pragma solidity 0.6.6;
-
-interface IRewardToken {
-
     function balanceOf(address account) external view returns (uint256);
 
+    /**
+     * @dev Moves `amount` tokens from the caller's account to `recipient`.
+     *
+     * Returns a boolean value indicating whether the operation succeeded.
+     *
+     * Emits a {Transfer} event.
+     */
+    function transfer(address recipient, uint256 amount) external returns (bool);
+
+    /**
+     * @dev Returns the remaining number of tokens that `spender` will be
+     * allowed to spend on behalf of `owner` through {transferFrom}. This is
+     * zero by default.
+     *
+     * This value changes when {approve} or {transferFrom} are called.
+     */
+    function allowance(address owner, address spender) external view returns (uint256);
+
+    /**
+     * @dev Sets `amount` as the allowance of `spender` over the caller's tokens.
+     *
+     * Returns a boolean value indicating whether the operation succeeded.
+     *
+     * IMPORTANT: Beware that changing an allowance with this method brings the risk
+     * that someone may use both the old and the new allowance by unfortunate
+     * transaction ordering. One possible solution to mitigate this race
+     * condition is to first reduce the spender's allowance to 0 and set the
+     * desired value afterwards:
+     * https://github.com/ethereum/EIPs/issues/20#issuecomment-263524729
+     *
+     * Emits an {Approval} event.
+     */
+    function approve(address spender, uint256 amount) external returns (bool);
+
+    /**
+     * @dev Moves `amount` tokens from `sender` to `recipient` using the
+     * allowance mechanism. `amount` is then deducted from the caller's
+     * allowance.
+     *
+     * Returns a boolean value indicating whether the operation succeeded.
+     *
+     * Emits a {Transfer} event.
+     */
     function transferFrom(address sender, address recipient, uint256 amount) external returns (bool);
 
+    /**
+     * @dev Emitted when `value` tokens are moved from one account (`from`) to
+     * another (`to`).
+     *
+     * Note that `value` may be zero.
+     */
+    event Transfer(address indexed from, address indexed to, uint256 value);
+
+    /**
+     * @dev Emitted when the allowance of a `spender` for an `owner` is set by
+     * a call to {approve}. `value` is the new allowance.
+     */
+    event Approval(address indexed owner, address indexed spender, uint256 value);
+}
+
+pragma solidity 0.6.6;
+interface IFeeToken is IERC20 {
+
+    function decimals() external view returns (uint8);
+
 }
 
 pragma solidity 0.6.6;
 
-interface INFTRepository {
+contract TortoiseStore is Context, ERC721Holder, Ownable, Pausable{
 
-    function add(uint256 id, uint grade) external;
-
-    function remove(uint256 id) external;
-
-    function get(uint256 id) external view returns(string memory name, uint grade, uint256 hp);
-
-}
-
-pragma solidity 0.6.6;
-
-interface INFTGovernancePoolLuckyDoge {
-
-    function isLuckyDoge(uint256 tokenId, address user) external view returns(bool);
-
-}
-
-pragma solidity 0.6.6;
-
-contract TortoiseGovernancePool is ERC721Holder, Ownable, Pausable{
-
-    using SafeMath for uint256;
     using EnumerableSet for EnumerableSet.UintSet;
 
     mapping (address => EnumerableSet.UintSet) private _holderTokens;
-    mapping (uint256 => address) private _tokenOwners;
+    mapping (uint256 => NFT) private _tokenOwners;
 
+    uint public feeWei;
+    IFeeToken public feeToken;
     IERC721 public nft;
-    IRewardToken public rewardToken;
-    mapping (uint256 => uint256) public startTimeMapping;
-    INFTGovernancePoolLuckyDoge public nftGovernancePoolLuckyDoge;
+
+    struct NFT{
+        uint256 tokenId;
+        uint256 price;
+        address payable owner;
+    }
+
+    function setFeeToken(address addr) external onlyOwner {
+        feeToken = IFeeToken(addr);
+        feeWei = 10 ** uint(feeToken.decimals());
+    }
 
     function setNFT(address addr) external onlyOwner {
         nft = IERC721(addr);
     }
 
-    function setRewardToken(address addr) external onlyOwner {
-        rewardToken = IRewardToken(addr);
-    }
-
-    function setNFTGovernancePoolLuckyDoge(address addr) external onlyOwner {
-        nftGovernancePoolLuckyDoge = INFTGovernancePoolLuckyDoge(addr);
-    }
-
     function balanceOf(address owner) public view returns (uint256) {
-        require(owner != address(0), "NFTPool: balance query for the zero address");
+        require(owner != address(0), "NFTStore: balance query for the zero address");
 
         return _holderTokens[owner].length();
     }
@@ -883,139 +830,86 @@ contract TortoiseGovernancePool is ERC721Holder, Ownable, Pausable{
         return _holderTokens[owner].at(index);
     }
 
+    /**
+     * @dev See {IERC721-ownerOf}.
+     */
     function ownerOf(uint256 tokenId) public view returns (address) {
-        return _tokenOwners[tokenId];
+        return _tokenOwners[tokenId].owner;
     }
 
+    /**
+     * @dev Triggers stopped state.
+     *
+     * Requirements:
+     *
+     * - The contract must not be paused.
+     */
     function pause() public virtual onlyOwner whenNotPaused {
         _pause();
     }
 
+    /**
+     * @dev Returns to normal state.
+     *
+     * Requirements:
+     *
+     * - The contract must be paused.
+     */
     function unpause() public virtual onlyOwner whenPaused {
         _unpause();
     }
 
-    function getDayReward() public view returns(uint256) {
-        uint256 totalReward = rewardToken.balanceOf(address(this));
-        uint256 totalNFT = nft.balanceOf(address(this));
+    function sell(uint256 tokenId, uint256 price) public whenNotPaused {
+        NFT memory newNFT = NFT({
+            tokenId : tokenId,
+            price : price,
+            owner : _msgSender()
+            });
 
-        if(totalNFT == 0) {
-            return 0;
-        }
-
-        return totalReward.div(totalNFT).div(365);
-    }
-
-    function queryReward(uint256 tokenId) public view returns (uint256) {
-        uint currentTime = block.timestamp;
-
-        uint256 startTime = startTimeMapping[tokenId];
-        uint256 miningTime = currentTime.sub(startTime);
-
-        uint256 miningDays = miningTime.div(86400);
-        uint256 dayReward = getDayReward();
-
-        return miningDays.mul(dayReward);
-    }
-
-    function queryReward() public view returns (uint256) {
-        uint256 balance = balanceOf(_msgSender());
-
-        uint256 userTotalReward = 0;
-        for (uint256 index = 0; index < balance; ++index) {
-            uint256 tokenId = tokenOfOwnerByIndex(_msgSender(), index);
-            uint256 reward = queryReward(tokenId);
-            userTotalReward = userTotalReward.add(reward);
-        }
-
-        return userTotalReward;
-    }
-
-    function withdrawalReward(uint256 tokenId) public whenNotPaused {
-        require(_tokenOwners[tokenId] == _msgSender(), "NFTGovernancePool: transfer of token that is not own");
-
-        uint256 reward = queryReward(tokenId);
-        if(reward == 0) {
-            return;
-        }
-
-        startTimeMapping[tokenId] = block.number;
-        rewardToken.transferFrom(address(this), _msgSender(), reward);
-    }
-
-    function withdrawalReward() public whenNotPaused {
-        uint256 balance = balanceOf(_msgSender());
-
-        uint256 userTotalReward;
-        for (uint256 index = 0; index < balance; ++index) {
-            uint256 tokenId = tokenOfOwnerByIndex(_msgSender(), index);
-
-            uint256 reward = queryReward(tokenId);
-            userTotalReward = userTotalReward.add(reward);
-
-            startTimeMapping[tokenId] = block.number;
-        }
-
-        if(userTotalReward == 0) {
-            return;
-        }
-
-        rewardToken.transferFrom(address(this), _msgSender(), userTotalReward);
-    }
-
-    function luckyDoge(uint256 tokenId) private {
-        bool flag = nftGovernancePoolLuckyDoge.isLuckyDoge(tokenId, _msgSender());
-        if(flag) {
-            uint256 totalReward = rewardToken.balanceOf(address(this));
-            uint256 luckyDogeReward = totalReward.mul(40).div(100);
-
-            rewardToken.transferFrom(address(this), _msgSender(), luckyDogeReward);
-        }
-    }
-
-    function lock(uint256 tokenId) public whenNotPaused {
         nft.safeTransferFrom(_msgSender(), address(this), tokenId);
-
         _holderTokens[_msgSender()].add(tokenId);
-        _tokenOwners[tokenId] = _msgSender();
-        startTimeMapping[tokenId] = block.timestamp;
-
-        luckyDoge(tokenId);
+        _tokenOwners[tokenId] = newNFT;
     }
 
-    function deleteToken(uint256 tokenId) private {
-        _holderTokens[_msgSender()].remove(tokenId);
-        _tokenOwners[tokenId] = address(0);
+    function buy(uint256 tokenId) public whenNotPaused payable {
+        NFT memory tokenNFT = _tokenOwners[tokenId];
+
+        require(tokenNFT.owner != address(0), "NFTStore: operator query for nonexistent token");
+
+        uint256 price = tokenNFT.price * feeWei;
+        feeToken.transferFrom(_msgSender(), tokenNFT.owner, price);
+
         nft.safeTransferFrom(address(this), _msgSender(), tokenId);
+        _holderTokens[tokenNFT.owner].remove(tokenId);
+        delete _tokenOwners[tokenId];
     }
 
     function unlock(uint256 tokenId) public {
-        withdrawalReward(tokenId);
+        NFT memory tokenNFT = _tokenOwners[tokenId];
 
-        deleteToken(tokenId);
-    }
+        require(tokenNFT.owner != address(0), "NFTStore: operator query for nonexistent token");
+        require(tokenNFT.owner == _msgSender(), "NFTStore: transfer of token that is not own");
 
-    function unlock() public {
-        withdrawalReward();
-
-        uint256 balance = balanceOf(_msgSender());
-        uint256[] memory tokenIdArray = new uint256[](balance);
-        for (uint256 index = 0; index < balance; ++index) {
-            uint256 tokenId = tokenOfOwnerByIndex(_msgSender(), index);
-            tokenIdArray[index] = tokenId;
-        }
-
-        for (uint256 index = 0; index < balance; ++index) {
-            uint256 tokenId = tokenIdArray[index];
-
-            deleteToken(tokenId);
-        }
+        nft.safeTransferFrom(address(this), _msgSender(), tokenId);
+        _holderTokens[_msgSender()].remove(tokenId);
+        delete _tokenOwners[tokenId];
     }
 
     function back(address target, uint256 tokenId) public onlyOwner {
-        require(_tokenOwners[tokenId] == address(0), "NFTPool:token is locked");
+        require(_tokenOwners[tokenId].owner == address(0), "NFTStore:token is locked");
 
         nft.safeTransferFrom(address(this), target, tokenId);
+    }
+
+    function getNFT(uint256 tokenId) public view returns(uint256 price, address owner) {
+        NFT memory tokenNFT = _tokenOwners[tokenId];
+
+        require(tokenNFT.owner != address(0), "NFTStore: operator query for nonexistent token");
+
+        price = tokenNFT.price;
+        owner = tokenNFT.owner;
+
+        return (price, owner);
     }
 
 }

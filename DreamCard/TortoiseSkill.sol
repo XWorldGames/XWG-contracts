@@ -1,0 +1,187 @@
+// SPDX-License-Identifier: MIT
+
+pragma solidity ^0.6.0;
+
+/*
+ * @dev Provides information about the current execution context, including the
+ * sender of the transaction and its data. While these are generally available
+ * via msg.sender and msg.data, they should not be accessed in such a direct
+ * manner, since when dealing with GSN meta-transactions the account sending and
+ * paying for execution may not be the actual sender (as far as an application
+ * is concerned).
+ *
+ * This contract is only required for intermediate, library-like contracts.
+ */
+abstract contract Context {
+    function _msgSender() internal view virtual returns (address payable) {
+        return msg.sender;
+    }
+
+    function _msgData() internal view virtual returns (bytes memory) {
+        this; // silence state mutability warning without generating bytecode - see https://github.com/ethereum/solidity/issues/2691
+        return msg.data;
+    }
+}
+
+pragma solidity ^0.6.0;
+
+/**
+ * @dev Contract module which provides a basic access control mechanism, where
+ * there is an account (an owner) that can be granted exclusive access to
+ * specific functions.
+ *
+ * By default, the owner account will be the one that deploys the contract. This
+ * can later be changed with {transferOwnership}.
+ *
+ * This module is used through inheritance. It will make available the modifier
+ * `onlyOwner`, which can be applied to your functions to restrict their use to
+ * the owner.
+ */
+contract Ownable is Context {
+    address private _owner;
+
+    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
+
+    /**
+     * @dev Initializes the contract setting the deployer as the initial owner.
+     */
+    constructor () internal {
+        address msgSender = _msgSender();
+        _owner = msgSender;
+        emit OwnershipTransferred(address(0), msgSender);
+    }
+
+    /**
+     * @dev Returns the address of the current owner.
+     */
+    function owner() public view returns (address) {
+        return _owner;
+    }
+
+    /**
+     * @dev Throws if called by any account other than the owner.
+     */
+    modifier onlyOwner() {
+        require(_owner == _msgSender(), "Ownable: caller is not the owner");
+        _;
+    }
+
+    /**
+     * @dev Leaves the contract without owner. It will not be possible to call
+     * `onlyOwner` functions anymore. Can only be called by the current owner.
+     *
+     * NOTE: Renouncing ownership will leave the contract without an owner,
+     * thereby removing any functionality that is only available to the owner.
+     */
+    function renounceOwnership() public virtual onlyOwner {
+        emit OwnershipTransferred(_owner, address(0));
+        _owner = address(0);
+    }
+
+    /**
+     * @dev Transfers ownership of the contract to a new account (`newOwner`).
+     * Can only be called by the current owner.
+     */
+    function transferOwnership(address newOwner) public virtual onlyOwner {
+        require(newOwner != address(0), "Ownable: new owner is the zero address");
+        emit OwnershipTransferred(_owner, newOwner);
+        _owner = newOwner;
+    }
+}
+
+pragma solidity 0.6.6;
+
+interface ITortoiseSkill {
+
+    function randomSkill(uint32 randomNumber, address msgSender, uint32 nameUint, uint skillNumer) external view returns(uint[] memory);
+
+}
+
+pragma solidity 0.6.6;
+
+contract Governances is Ownable {
+
+    mapping(address => bool) public governances;
+
+    function addGovernance(address governance) public onlyOwner {
+        governances[governance] = true;
+    }
+
+    function removeGovernance(address governance) public onlyOwner {
+        governances[governance] = false;
+    }
+
+    modifier onlyGovernance() {
+        require(governances[_msgSender()], "ERC721: caller is not the owner");
+        _;
+    }
+
+}
+
+pragma solidity 0.6.6;
+
+contract TortoiseSkill is ITortoiseSkill, Governances {
+
+    mapping(uint32 => uint16[][]) private skillMapping;
+
+    function addSkill(
+        uint32 name
+        ,uint16[]memory skill1
+        ,uint16[]memory skill2
+        ,uint16[]memory skill3
+        ,uint16[]memory skill4
+    ) public onlyGovernance {
+        skillMapping[name] =[skill1, skill2, skill3, skill4];
+    }
+
+    function getSkill(uint32 name) public view returns(
+        uint16[]memory skill1
+        ,uint16[]memory skill2
+        ,uint16[]memory skill3
+        ,uint16[]memory skill4
+        ) {
+        uint16[][] memory skillGroups = skillMapping[name];
+
+        skill1 = skillGroups[0];
+        skill2 = skillGroups[1];
+        skill3 = skillGroups[2];
+        skill4 = skillGroups[3];
+    }
+
+    function buildSkill(uint16 randomNumber, uint16[] memory skills) public pure returns(uint) {
+        uint16 start = 0;
+        for(uint skillIndex =0; skillIndex < skills.length; skillIndex++) {
+            uint16 end = start+skills[skillIndex];
+            if(randomNumber>= start && randomNumber < end) {
+                return skillIndex;
+            }
+            start = end;
+        }
+    }
+
+    function getRandomNumber(uint32 randomNumber, address msgSender, uint id) private view returns(uint16) {
+        return uint16(uint256(keccak256(abi.encodePacked(randomNumber, block.timestamp, block.difficulty, msgSender, id))) % 10000);
+    }
+
+    function randomSkill(uint32 randomNumber, address msgSender, uint32 name, uint skillNumer) public view override returns(uint[] memory) {
+        uint16 number = getRandomNumber(randomNumber, msgSender, skillNumer);
+
+        uint16[][] memory skillGroups = skillMapping[name];
+
+        uint[] memory randomSkills = new uint[](skillNumer);
+
+        for(uint skillGropIndex =0; skillGropIndex < skillNumer; skillGropIndex++) {
+            uint16[] memory skills = skillGroups[skillGropIndex];
+
+            uint skill = buildSkill(number, skills);
+            randomSkills[skillGropIndex] = skill;
+
+            if(skillGropIndex != skillNumer-1) {
+                number = getRandomNumber(randomNumber, msgSender, skillNumer+skill);
+            }
+        }
+
+        return randomSkills;
+    }
+
+}

@@ -551,9 +551,11 @@ contract TortoisesFactory is Pausable, Ownable {
         return uint32(uint256(keccak256(abi.encodePacked("8F4A7142E03F4EF089A4C28878964C5D", block.timestamp, block.difficulty, msg.sender, id))) % 100000);
     }
 
-    function innerBuild() private whenNotPaused returns(uint256) {
+    function build() public whenNotPaused returns(uint256) {
         uint256 id = nft.mint(_msgSender());
         uint32 randomNumber = getRandomNumber(id);
+
+        feeToken.transferFrom(_msgSender(), devFeeAddress, feeWei);
 
         uint32[] memory role = tortoiseRole.randomRole(randomNumber);
         (uint grade, uint skillNumer, uint32 blood, uint32 attack) = tortoiseGrade.randomGrade(randomNumber);
@@ -565,24 +567,6 @@ contract TortoisesFactory is Pausable, Ownable {
         nftRepository.add(id, role, grade, skills, fiveElement);
 
         return id;
-    }
-
-    function build() public whenNotPaused returns(uint256) {
-        feeToken.transferFrom(_msgSender(), devFeeAddress, feeWei);
-
-        return innerBuild();
-    }
-
-    function bulidList(uint number) public whenNotPaused returns(uint256[] memory) {
-        feeToken.transferFrom(_msgSender(), devFeeAddress, feeWei.mul(number));
-
-        uint256[] memory tokenList = new uint256[](number);
-        for(uint i=0; i<number; i++) {
-            uint256 tokenId = innerBuild();
-            tokenList[i] = tokenId;
-        }
-
-        return tokenList;
     }
 
 }

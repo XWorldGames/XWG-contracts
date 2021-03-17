@@ -771,12 +771,6 @@ contract TortoiseSwap is Context, ERC721Holder, Governances, Pausable{
         _tokenOwners[tokenId] = _msgSender();
     }
 
-    function offlineList(uint256[] memory tokenList) public whenNotPaused {
-        for(uint index=0; index<tokenList.length; index++) {
-            offline(tokenList[index]);
-        }
-    }
-
     function add(address owner, uint32[] memory role, uint grade, uint[] memory skills, uint fiveElement) public onlyGovernance whenNotPaused returns(uint256) {
         uint256 id = nft.mint(owner);
         nftRepository.add(id, role, grade, skills, fiveElement);

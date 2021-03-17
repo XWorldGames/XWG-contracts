@@ -89,12 +89,17 @@ contract Ownable is Context {
     }
 }
 
-
 pragma solidity 0.6.6;
 
-interface INFTGovernancePoolLuckyDoge {
+interface ITortoiseRepository {
 
-    function isLuckyDoge(uint256 tokenId, address user) external view returns(bool);
+    function add(uint256 id, uint32[] calldata role, uint grade, uint[] calldata skills, uint fiveElements) external;
+
+    function remove(uint256 id) external;
+
+    function updateRole(uint256 id, uint index, uint32 value) external;
+
+    function get(uint256 id) external view returns(uint32[] memory role, uint grade, uint[] memory skills, uint fiveElement);
 
 }
 
@@ -121,10 +126,50 @@ contract Governances is Ownable {
 
 pragma solidity 0.6.6;
 
-contract TortoiseGovernancePoolLuckyDogeTest is INFTGovernancePoolLuckyDoge, Governances {
+contract TortoiseRepository is ITortoiseRepository, Governances {
 
-    function isLuckyDoge(uint256 tokenId, address user) public onlyGovernance override view returns(bool) {
-        return false;
+    mapping(uint256 => uint32[]) private roleMapping;
+    mapping(uint256 => uint) private gradeMapping;
+    mapping(uint256 => uint[]) private skillMapping;
+    mapping(uint256 => uint) private fiveElementMapping;
+
+    function add(uint256 id, uint32[] memory role, uint grade, uint[] memory skills, uint fiveElement) public onlyGovernance override {
+        roleMapping[id] = role;
+        gradeMapping[id] = grade;
+        skillMapping[id] = skills;
+        fiveElementMapping[id] = fiveElement;
+    }
+
+    function updateRole(uint256 id, uint index, uint32 value) public onlyGovernance override {
+        uint32[] storage role = roleMapping[id];
+        role[index] = value;
+    }
+
+    function updateGrade(uint256 id, uint grade) public onlyGovernance {
+        gradeMapping[id] = grade;
+    }
+
+    function updateSkill(uint256 id, uint index, uint16 value) public onlyGovernance {
+        uint[] storage skills = skillMapping[id];
+        skills[index] = value;
+    }
+
+    function updateFiveElements(uint256 id, uint fiveElement) public onlyGovernance {
+        fiveElementMapping[id] = fiveElement;
+    }
+
+    function remove(uint256 id) public onlyGovernance override {
+        delete roleMapping[id];
+        delete gradeMapping[id];
+        delete skillMapping[id];
+        delete fiveElementMapping[id];
+    }
+
+    function get(uint256 id) public view override returns(uint32[] memory role, uint grade, uint[] memory skills, uint fiveElement) {
+       role = roleMapping[id];
+       grade =  gradeMapping[id];
+       skills = skillMapping[id];
+       fiveElement = fiveElementMapping[id];
     }
 
 }
